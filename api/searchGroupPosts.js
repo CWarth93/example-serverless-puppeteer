@@ -7,7 +7,7 @@ const endpoint = async (req, res) => {
     const { hits } = await getGroupPostsByKeywords(group, keywords);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.setHeader("Content-Type", `image/png`);
+    res.setHeader("Content-Type", `application/json`);
     res.status('200').json({ hits });
   } catch (e) {
     res.statusCode = 500;
