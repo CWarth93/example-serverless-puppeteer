@@ -45,12 +45,16 @@ const getGroupPostsByKeywords = async (group, keywords) => {
 		return { hits };
 	} catch (error) {
 		console.error(error);
-		const file = await page.screenshot({
-			type: "png",
-		  });
-		await closeBrowser(browser);
-		return { file };
-		//return { hits: [], error };
+		try {
+			const file = await page.screenshot({
+				type: "png",
+			  });
+			await closeBrowser(browser);
+			return { file };
+		} catch(e) {
+			console.error(e);
+			return { hits: [], error: e };
+		}
 	}
 };
 
