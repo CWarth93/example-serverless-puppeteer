@@ -47,6 +47,7 @@ const endpoint = async (req, res) => {
     await browser.close();
 
     res.statusCode = 200;
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Content-Type", `image/png`);
     res.end(file);
   } catch (e) {
