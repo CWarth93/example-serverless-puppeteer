@@ -58,4 +58,4 @@ const endpoint = async (req, res) => {
 };
 
 
-module.exports = { endpoint };
+export default endpoint;
