@@ -48,6 +48,7 @@ const endpoint = async (req, res) => {
 
     res.statusCode = 200;
     res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.setHeader("Content-Type", `image/png`);
     res.end(file);
   } catch (e) {
