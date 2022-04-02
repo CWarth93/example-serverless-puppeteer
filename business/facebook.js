@@ -3,9 +3,10 @@ import { asyncForEach } from '../basics/loops';
 
 const getGroupPostsByKeywords = async (group, keywords) => {
 	let browser;
+	let page;
 	try {
 		browser = await getBrowser();
-		const page = await getPage(browser);
+		page = await getPage(browser);
 		await openUrl(page, group.replace('www.', 'mbasic.'));
 		const cookieButton = await getElementByProperty(page, 'button', 'name', 'accept_only_essential');
 		if (cookieButton !== null) {
@@ -44,8 +45,12 @@ const getGroupPostsByKeywords = async (group, keywords) => {
 		return { hits };
 	} catch (error) {
 		console.error(error);
+		const file = await page.screenshot({
+			type: "png",
+		  });
 		await closeBrowser(browser);
-		return { hits: [], error };
+		return { file };
+		//return { hits: [], error };
 	}
 };
 
