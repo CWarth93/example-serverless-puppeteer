@@ -1,15 +1,65 @@
-const puppeteer = require("puppeteer-core");
-const chrome = require("chrome-aws-lambda");
+//import launchChrome from '@serverless-chrome/lambda';
+//import { sendRequest } from './http';
+
+import chromium from 'chromium';
+
+const isDev = process.env.IS_LOCAL === 'true';
 
 const getBrowser = async () => {
-	try { 
-		const options = {
-			args: chrome.args,
-			executablePath: await chrome.executablePath,
-			headless: chrome.headless,
-		  };
-		const browser = await puppeteer.launch(options);
+	try {
+		let puppeteer;
+		if (isDev) {
+			puppeteer = require('puppeteer');
+		} else {
+			puppeteer = require('puppeteer-core');
+		}
+		return puppeteer.launch({
+			//args: chromium.args,
+			executablePath: chromium.path,
+			headless: true,
+			ignoreHTTPSErrors: true,
+		});
+
+		/*
+		const chrome = await launchChrome({
+			chromeFlags: ['--headless'],			
+			logLevel: 'info',
+			output: 'json'
+		  });
+		const res = await sendRequest({ method: 'GET', url: `http://localhost:${chrome.port}/json/version` });
+		const { webSocketDebuggerUrl } = res;
+
+		let puppeteer;
+		if(isDev) {
+			puppeteer = require('puppeteer');
+		} else {
+			puppeteer = require('puppeteer-core');
+		}
+
+		const browser = await puppeteer.connect({browserWSEndpoint: webSocketDebuggerUrl});
 		return browser;
+		*/
+
+		/*
+		const executablePath = await chromium.executablePath;
+		if (executablePath === null) {
+			// running locally
+			const puppeteer = require('puppeteer');
+			return puppeteer.launch({
+				headless: true,
+				ignoreHTTPSErrors: true
+			});
+		} else {
+			// running on vercel
+			const puppeteer = require('puppeteer-core');
+			return puppeteer.launch({
+				args: chromium.args,
+				executablePath,
+				headless: chromium.headless,
+				ignoreHTTPSErrors: true
+			});
+		}
+		*/
 	} catch (e) {
 		console.log(e);
 	}
