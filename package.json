@@ -5,13 +5,15 @@
   "scripts": {
     "setup": "npm install",
     "style": "prettier --single-quote --use-tabs --arrow-parens always --quote-props consistent --print-width 160 --write **/*.{ts,js,css,html}",
-    "run": "next dev"
+    "run": "next dev -p 3030",
+    "publish": "lt --port 3030"
   },
   "dependencies": {
     "@serverless-chrome/lambda": "^1.0.0-57.2",
     "chrome-launcher": "^0.15.0",
     "chromium": "^3.0.3",
     "dotenv": "^8.2.0",
+    "localtunnel": "^2.0.2",
     "micro-cors": "^0.1.1",
     "moment": "^2.29.1",
     "next": "10.0.0",

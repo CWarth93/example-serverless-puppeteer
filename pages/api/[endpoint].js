@@ -27,6 +27,16 @@ const api = async (req, res) => {
 	}
 };
 
-const cors = micro({});
+const cors = micro({
+	allowHeaders: [
+	  'X-Requested-With',
+	  'Access-Control-Allow-Origin',
+	  'X-HTTP-Method-Override',
+	  'Content-Type',
+	  'Authorization',
+	  'Accept',
+	  'Bypass-Tunnel-Reminder'
+	],
+  });
 
 export default cors(api);
