@@ -1,36 +1,83 @@
-// README
+# Serverless Puppeteer
 
-//// Description
-Web Application
+> Web search API that returns the first 5 result URLs for a given phrase. Built with **Next.js** and **Puppeteer**, using DuckDuckGo HTML for results.
 
-//// Techstack
-NodeJS, Next, React
+---
 
-//// Structure
-- backend
--- basics
--- business
--- resources
-- connection
-- frontend
--- components
--- elements
--- hocs
--- pages
--- resources
+## Tech stack
 
-//// How to get started
-1) run script "setup"
-2) run script "run"
-3) open browser and use localhost as url
+| Layer   | Tech              |
+|--------|-------------------|
+| Runtime| Node.js           |
+| Framework | Next.js        |
+| UI     | React             |
+| Automation | Puppeteer      |
 
-//// How to use
-- the names of the files in the pages directory define the routes (f.e. http::localhost:3000/hello is a legit route here)
-- pages are created like: hocs > pages > components > elements
-- attributes can be inherited
-- backend directory for deeper functionality (keep ui clean)
+---
 
-//// Testing
+## Project structure
 
-- testing the ui: set MODE = 'test' in next.config.js and you can use connection/mock.js for providing test data
-- testing the functionality: you can write tests for specific functions in connection/connector.test.js
+| Folder       | Purpose                                      |
+|-------------|-----------------------------------------------|
+| `basics/`   | Puppeteer helpers (browser, page, navigation) |
+| `business/` | Search logic (DuckDuckGo HTML)                |
+| `pages/api/`| Next.js API routes                           |
+
+---
+
+## Local setup
+
+1. **Install dependencies**
+   ```bash
+   npm run setup
+   ```
+
+2. **Start the dev server**
+   ```bash
+   npm run run
+   ```
+
+3. **Open** [http://localhost:3030](http://localhost:3030)
+
+---
+
+## API
+
+### `POST /api/search`
+
+Returns the first 5 search result URLs for the given phrase.
+
+**Request body (JSON):**
+
+```json
+{
+  "searchPhrase": "your search query"
+}
+```
+
+**Success response:**
+
+```json
+{
+  "urls": [
+    "https://example.com/...",
+    "https://..."
+  ]
+}
+```
+
+**Error handling:** On failure the response includes `urls: []` and optionally an `error` field.
+
+---
+
+### Testing (production)
+
+Examples below call the deployed API at **https://example-serverless-puppeteer-7td0iv2ex.vercel.app**.
+
+**cURL:**
+
+```bash
+curl -X POST https://example-serverless-puppeteer-7td0iv2ex.vercel.app/api/search \
+  -H "Content-Type: application/json" \
+  -d "{\"searchPhrase\": \"hello world\"}"
+```
