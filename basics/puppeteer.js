@@ -1,5 +1,12 @@
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
+// @sparticuz/chromium only sets LD_LIBRARY_PATH and extracts shared libs (al2/al2023)
+// when it detects AWS Lambda. Vercel doesn't set AWS_EXECUTION_ENV, so we set it
+// before loading the module so Chromium can find libnss3.so etc.
+if (process.env.VERCEL && !process.env.AWS_EXECUTION_ENV) {
+	process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs18.x';
+}
+
 const getBrowser = async () => {
 	if (isServerless) {
 		const chromium = require('@sparticuz/chromium');
