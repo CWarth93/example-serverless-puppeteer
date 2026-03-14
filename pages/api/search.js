@@ -1,6 +1,11 @@
 import micro from 'micro-cors';
-import { spawn } from 'child_process';
-import path from 'path';
+
+let searchModule = null;
+const getSearchUrlsFromModule = async (...args) => {
+	if (!searchModule) searchModule = await import('../business/search.js');
+	const { getSearchUrls } = searchModule.default || searchModule;
+	return getSearchUrls(...args);
+};
 
 const parseBody = (req) =>
 	new Promise((resolve) => {
@@ -23,48 +28,17 @@ const parseBody = (req) =>
 
 const SEARCH_TIMEOUT_MS = 15000;
 
-const runSearchInChild = (searchPhrase) =>
-	new Promise((resolve, reject) => {
-		const root = path.resolve(process.cwd());
-		const scriptPath = path.join(root, 'run-search.js');
-		const child = spawn(
-			process.execPath,
-			['--openssl-legacy-provider', scriptPath, searchPhrase],
-			{
-				cwd: root,
-				env: { ...process.env, IS_LOCAL: 'true' },
-				stdio: ['ignore', 'pipe', 'pipe'],
-			}
-		);
-		let stdout = '';
-		let stderr = '';
-		child.stdout.on('data', (d) => (stdout += d));
-		child.stderr.on('data', (d) => (stderr += d));
-		const timeout = setTimeout(() => {
-			child.kill('SIGTERM');
-			reject(new Error(`Search timed out after ${SEARCH_TIMEOUT_MS / 1000}s. ${stderr || ''}`));
-		}, SEARCH_TIMEOUT_MS);
-		child.on('close', (code, signal) => {
-			clearTimeout(timeout);
-			if (signal === 'SIGTERM') {
-				reject(new Error('Search timed out'));
-				return;
-			}
-			if (code !== 0) {
-				reject(new Error(stderr || 'Search failed'));
-				return;
-			}
-			try {
-				resolve(JSON.parse(stdout));
-			} catch (_) {
-				reject(new Error('Invalid response'));
-			}
-		});
-		child.on('error', (err) => {
-			clearTimeout(timeout);
-			reject(err);
-		});
-	});
+const runSearchWithTimeout = (searchPhrase) => {
+	return Promise.race([
+		getSearchUrlsFromModule(searchPhrase),
+		new Promise((_, reject) =>
+			setTimeout(
+				() => reject(new Error(`Search timed out after ${SEARCH_TIMEOUT_MS / 1000}s`)),
+				SEARCH_TIMEOUT_MS
+			)
+		),
+	]);
+};
 
 const api = async (req, res) => {
 	if (req.method === 'GET') {
@@ -78,7 +52,7 @@ const api = async (req, res) => {
 			return res.status(400).json({ error: 'searchPhrase is required' });
 		}
 
-		const result = await runSearchInChild(searchPhrase.trim());
+		const result = await runSearchWithTimeout(searchPhrase.trim());
 		res.status(200).json(result);
 	} catch (error) {
 		res.status(500).json({ error: error.toString().replace(/^Error:\s*/, '') });
