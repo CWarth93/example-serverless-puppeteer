@@ -7,14 +7,20 @@ if (process.env.VERCEL && !process.env.AWS_EXECUTION_ENV) {
 	process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_nodejs18.x';
 }
 
+const path = require('path');
+
 const getBrowser = async () => {
 	if (isServerless) {
 		const chromium = require('@sparticuz/chromium');
 		const puppeteer = require('puppeteer-core');
+		const executablePath = await chromium.executablePath();
+		// Force library path so Chromium finds libnss3.so, libnspr4.so etc. (al2 libs in /tmp/al2/lib)
+		const libPath = path.join(path.dirname(executablePath), 'al2', 'lib');
+		process.env.LD_LIBRARY_PATH = [libPath, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
 		return puppeteer.launch({
 			args: chromium.args,
 			defaultViewport: chromium.defaultViewport,
-			executablePath: await chromium.executablePath(),
+			executablePath,
 			headless: chromium.headless,
 			ignoreHTTPSErrors: true,
 		});

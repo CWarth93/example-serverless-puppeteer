@@ -1,5 +1,7 @@
 {
   "env": {
-    "NODE_OPTIONS": "--openssl-legacy-provider"
+    "NODE_OPTIONS": "--openssl-legacy-provider",
+    "AWS_EXECUTION_ENV": "AWS_Lambda_nodejs18.x",
+    "AWS_LAMBDA_JS_RUNTIME": "nodejs18.x"
   }
 }
