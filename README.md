@@ -72,12 +72,12 @@ Returns the first 5 search result URLs for the given phrase.
 
 ### Testing (production)
 
-Examples below call the deployed API at **https://example-serverless-puppeteer-7td0iv2ex.vercel.app**.
+Examples below call the deployed API at **https://example-serverless-puppeteer.vercel.app/**.
 
 **cURL:**
 
 ```bash
-curl -X POST https://example-serverless-puppeteer-7td0iv2ex.vercel.app/api/search \
+curl -X POST https://example-serverless-puppeteer.vercel.app/api/search \
   -H "Content-Type: application/json" \
   -d "{\"searchPhrase\": \"hello world\"}"
 ```
