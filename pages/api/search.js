@@ -2,7 +2,7 @@ import micro from 'micro-cors';
 
 let searchModule = null;
 const getSearchUrlsFromModule = async (...args) => {
-	if (!searchModule) searchModule = await import('../business/search.js');
+	if (!searchModule) searchModule = await import('../../business/search.js');
 	const { getSearchUrls } = searchModule.default || searchModule;
 	return getSearchUrls(...args);
 };
