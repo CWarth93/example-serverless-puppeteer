@@ -4,11 +4,18 @@ const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
 const getBrowser = async () => {
 	if (isServerless) {
+		// Must set before require: chromium's top-level code uses this to extract al2 libs.
+		if (process.env.VERCEL) {
+			process.env.AWS_EXECUTION_ENV = process.env.AWS_EXECUTION_ENV || 'AWS_Lambda_nodejs18.x';
+			process.env.AWS_LAMBDA_JS_RUNTIME = process.env.AWS_LAMBDA_JS_RUNTIME || 'nodejs18.x';
+		}
 		const chromium = require('@sparticuz/chromium');
 		const puppeteer = require('puppeteer-core');
 		chromium.setGraphicsMode = false;
-		const executablePath = await chromium.executablePath();
-		// Ensure Chromium child process finds shared libs (libnss3.so, libnspr4.so).
+		// Explicit bin path so .br files are found when __dirname is wrong after bundling.
+		const chromiumBin = path.join(path.dirname(require.resolve('@sparticuz/chromium')), '..', 'bin');
+		const executablePath = await chromium.executablePath(chromiumBin);
+		// Force lib path so the Chromium process finds libnss3.so, libnspr4.so.
 		const al2Lib = path.join(os.tmpdir(), 'al2', 'lib');
 		process.env.LD_LIBRARY_PATH = [al2Lib, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
 		return puppeteer.launch({
