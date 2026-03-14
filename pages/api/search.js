@@ -1,3 +1,4 @@
+import './vercel-setup.js';
 import micro from 'micro-cors';
 
 let searchModule = null;

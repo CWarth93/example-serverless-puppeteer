@@ -1,31 +1,20 @@
+const path = require('path');
+const os = require('os');
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
-
-// Suppress url.parse() deprecation (DEP0169) from dependencies on Vercel.
-if (process.env.VERCEL && process.emitWarning) {
-	const orig = process.emitWarning;
-	process.emitWarning = (warning, ...args) => {
-		const code = typeof args[1] === 'object' && args[1] !== null ? args[1].code : args[2];
-		if (code === 'DEP0169') return;
-		return orig.apply(process, [warning, ...args]);
-	};
-}
-
-// Vercel runs on Lambda but doesn't set Lambda env vars. @sparticuz/chromium's
-// module-level code needs these at require() time to extract shared libs and set LD_LIBRARY_PATH.
-if (process.env.VERCEL) {
-	process.env.AWS_EXECUTION_ENV = process.env.AWS_EXECUTION_ENV || 'AWS_Lambda_nodejs18.x';
-	process.env.AWS_LAMBDA_JS_RUNTIME = process.env.AWS_LAMBDA_JS_RUNTIME || 'nodejs18.x';
-}
 
 const getBrowser = async () => {
 	if (isServerless) {
 		const chromium = require('@sparticuz/chromium');
 		const puppeteer = require('puppeteer-core');
 		chromium.setGraphicsMode = false;
+		const executablePath = await chromium.executablePath();
+		// Ensure Chromium child process finds shared libs (libnss3.so, libnspr4.so).
+		const al2Lib = path.join(os.tmpdir(), 'al2', 'lib');
+		process.env.LD_LIBRARY_PATH = [al2Lib, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
 		return puppeteer.launch({
 			args: chromium.args,
 			defaultViewport: chromium.defaultViewport,
-			executablePath: await chromium.executablePath(),
+			executablePath,
 			headless: chromium.headless,
 			ignoreHTTPSErrors: true,
 		});
