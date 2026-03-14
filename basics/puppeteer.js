@@ -12,9 +12,7 @@ const getBrowser = async () => {
 		const chromium = require('@sparticuz/chromium');
 		const puppeteer = require('puppeteer-core');
 		chromium.setGraphicsMode = false;
-		// Explicit bin path so .br files are found when __dirname is wrong after bundling.
-		const chromiumBin = path.join(path.dirname(require.resolve('@sparticuz/chromium')), '..', 'bin');
-		const executablePath = await chromium.executablePath(chromiumBin);
+		const executablePath = await chromium.executablePath();
 		// Force lib path so the Chromium process finds libnss3.so, libnspr4.so.
 		const al2Lib = path.join(os.tmpdir(), 'al2', 'lib');
 		process.env.LD_LIBRARY_PATH = [al2Lib, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
