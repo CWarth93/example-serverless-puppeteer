@@ -1,20 +1,19 @@
-const chromium = require('chromium');
-
-const isDev = process.env.IS_LOCAL !== 'false';
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
 const getBrowser = async () => {
-	let puppeteer;
-	if (isDev) {
-		puppeteer = require('puppeteer');
+	if (isServerless) {
+		const chromium = require('@sparticuz/chromium');
+		const puppeteer = require('puppeteer-core');
 		return puppeteer.launch({
-			headless: true,
+			args: chromium.args,
+			defaultViewport: chromium.defaultViewport,
+			executablePath: await chromium.executablePath(),
+			headless: chromium.headless,
 			ignoreHTTPSErrors: true,
-			args: ['--no-sandbox', '--disable-setuid-sandbox'],
 		});
 	}
-	puppeteer = require('puppeteer-core');
+	const puppeteer = require('puppeteer');
 	return puppeteer.launch({
-		executablePath: chromium.path,
 		headless: true,
 		ignoreHTTPSErrors: true,
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
