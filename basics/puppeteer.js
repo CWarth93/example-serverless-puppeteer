@@ -4,18 +4,20 @@ const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
 const getBrowser = async () => {
 	if (isServerless) {
-		// Must set before require: chromium's top-level code uses this to extract al2 libs.
+		// Must set before require: chromium uses this to extract shared libs (al2 or al2023).
+		// Vercel typically runs Node 20+, so use 20.x to get al2023 libs.
 		if (process.env.VERCEL) {
-			process.env.AWS_EXECUTION_ENV = process.env.AWS_EXECUTION_ENV || 'AWS_Lambda_nodejs18.x';
-			process.env.AWS_LAMBDA_JS_RUNTIME = process.env.AWS_LAMBDA_JS_RUNTIME || 'nodejs18.x';
+			process.env.AWS_EXECUTION_ENV = process.env.AWS_EXECUTION_ENV || 'AWS_Lambda_nodejs20.x';
+			process.env.AWS_LAMBDA_JS_RUNTIME = process.env.AWS_LAMBDA_JS_RUNTIME || 'nodejs20.x';
 		}
 		const chromium = require('@sparticuz/chromium');
 		const puppeteer = require('puppeteer-core');
 		chromium.setGraphicsMode = false;
 		const executablePath = await chromium.executablePath();
-		// Force lib path so the Chromium process finds libnss3.so, libnspr4.so.
-		const al2Lib = path.join(os.tmpdir(), 'al2', 'lib');
-		process.env.LD_LIBRARY_PATH = [al2Lib, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
+		// Force lib path: al2023 for Node 20+, al2 for Node 18.
+		const libDir = process.env.AWS_LAMBDA_JS_RUNTIME && process.env.AWS_LAMBDA_JS_RUNTIME.includes('20') ? 'al2023' : 'al2';
+		const libPath = path.join(os.tmpdir(), libDir, 'lib');
+		process.env.LD_LIBRARY_PATH = [libPath, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':');
 		return puppeteer.launch({
 			args: chromium.args,
 			defaultViewport: chromium.defaultViewport,
