@@ -1,5 +1,12 @@
 const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
 
+// Vercel runs on Lambda but doesn't set Lambda env vars. @sparticuz/chromium's
+// module-level code needs these at require() time to extract shared libs and set LD_LIBRARY_PATH.
+if (process.env.VERCEL) {
+	process.env.AWS_EXECUTION_ENV = process.env.AWS_EXECUTION_ENV || 'AWS_Lambda_nodejs18.x';
+	process.env.AWS_LAMBDA_JS_RUNTIME = process.env.AWS_LAMBDA_JS_RUNTIME || 'nodejs18.x';
+}
+
 const getBrowser = async () => {
 	if (isServerless) {
 		const chromium = require('@sparticuz/chromium');
